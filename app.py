@@ -50,9 +50,58 @@ st.set_page_config(
     layout="centered"
 )
 
+# -------- SIDEBAR FOR USER PROFILE --------
+with st.sidebar:
+    st.header("Your Profile")
+    
+    # Major selection
+    major_options = ["", "BACS", "BSCS"]
+    selected_major = st.selectbox(
+        "Select your major:",
+        major_options,
+        index=major_options.index(st.session_state.major) if st.session_state.major in major_options else 0
+    )
+    if selected_major != st.session_state.major:
+        st.session_state.major = selected_major if selected_major else None
+        st.rerun()
+    
+    # Completed classes
+    st.subheader("Completed Classes")
+    new_class = st.text_input("Add a completed class (e.g., CS 1110):", key="new_class_input")
+    if st.button("Add Class"):
+        if new_class and new_class not in st.session_state.completed_classes:
+            st.session_state.completed_classes.append(new_class.upper())
+            st.rerun()
+    
+    # Display completed classes
+    if st.session_state.completed_classes:
+        st.write("Completed Classes:")
+        for cls in st.session_state.completed_classes:
+            col1, col2 = st.columns([4, 1])
+            with col1:
+                st.write(f"• {cls}")
+            with col2:
+                if st.button("❌", key=f"remove_{cls}"):
+                    st.session_state.completed_classes.remove(cls)
+                    st.rerun()
+    else:
+        st.write("No completed classes added yet.")
+
 # -------- SESSION STATE INIT --------
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "major" not in st.session_state:
+    st.session_state.major = None
+
+if "completed_classes" not in st.session_state:
+    st.session_state.completed_classes = []
+
+if "major" not in st.session_state:
+    st.session_state.major = None
+
+if "completed_classes" not in st.session_state:
+    st.session_state.completed_classes = []
 
 # -------- HEADER + CLEAR BUTTON ROW --------
 header_col, button_col = st.columns([6, 1])
@@ -96,6 +145,10 @@ Have a warm, welcoming personality.
 Help guide users to next question and if user says yes or wants that suggested question to be answered, answer it.
 Give users proper contact information if they ask.
 
+User Profile:
+Major: {major}
+Completed Classes: {completed_classes}
+
 Chat History:
 {history}
 
@@ -130,10 +183,16 @@ def ask_question(query_text):
     context_text = "\n\n---\n\n".join([doc.page_content for doc, _ in results])
     history_text = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages[-4:]])
 
+    # Format user profile
+    major_text = st.session_state.major if st.session_state.major else "Not specified"
+    completed_classes_text = ", ".join(st.session_state.completed_classes) if st.session_state.completed_classes else "None specified"
+
     prompt = prompt_template.format(
         context=context_text,
         question=query_text,
-        history=history_text
+        history=history_text,
+        major=major_text,
+        completed_classes=completed_classes_text
     )
 
     model = ChatOpenAI()
