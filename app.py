@@ -88,7 +88,7 @@ for message in st.session_state.messages:
 
 # -------- PROMPT TEMPLATE --------
 PROMPT_TEMPLATE = """
-You are a helpful UVA Engineering Academic Advisor.
+You are a helpful UVA Computer Science Academic Advisor.
 Answer clearly and concisely in plain language.
 If information is missing, say so honestly.
 Do not fabricate requirements.
