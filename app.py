@@ -45,7 +45,7 @@ CHROMA_PATH = "chroma-embeddings"
 #-----------------------------------------------------------------------------------------------------------------------
 # -------- PAGE CONFIG --------
 st.set_page_config(
-    page_title="UVA Engineering Advisor",
+    page_title="UVA Computer Science Advisor",
     page_icon="🎓",
     layout="centered"
 )
@@ -142,7 +142,7 @@ def ask_question(query_text):
     return response.content
 
 # -------- USER INPUT --------
-user_input = st.chat_input("Ask about UVA Engineering...")
+user_input = st.chat_input("Ask about UVA Computer Science...")
 
 if user_input:
 
@@ -185,7 +185,7 @@ if len(st.session_state.messages) == 0:
     st.markdown(
         """
         <h3 style='text-align: center; color: gray; opacity: 0.95;'>
-            Ask me anything about UVA Engineering.
+            Ask me anything about UVA Computer Science.
         </h3>
         """,
         unsafe_allow_html=True
