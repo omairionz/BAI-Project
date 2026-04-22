@@ -61,7 +61,7 @@ with header_col:
     st.markdown(
         """
         <h1 style='margin-bottom: 0; color: #FFFFFF;'>
-            🎓 UVA Engineering Advisor
+            🎓 UVA Computer Science Advisor
         </h1>
         """,
         unsafe_allow_html=True
