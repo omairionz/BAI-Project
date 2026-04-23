@@ -64,19 +64,35 @@ def load_documents():
 # This is a recursive text splitter. It takes the data from each document and splits it into smaller chunks
 # Takes in a LIST of documents for splitting. Good if you have multiple data files
 def split_text(documents: list[Document]):
-    text_splitter = RecursiveCharacterTextSplitter( # Recursive used to intelligently split text. No sentence/word breaks.
-        chunk_size = 1000, # How long each chunk is in characters
-        chunk_overlap = 500, # How much overlap between each chunk
-        length_function = len, # Measures chunk size using Python's len() function (basically confirms correct char count)
-        add_start_index = True, # Each chunk stores meta data from origin
-    )
+    text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=100,
+    length_function=len,
+    add_start_index=True,
+    separators=["\n## ", "\n### ", "\n- ", "\n", " ", ""],
+)
 
-    # Takes list of document objects and splits them into smaller document chunks & perserves meta data 
-    # Each chunk is now ready to be embedded
-    chunks = text_splitter.split_documents(documents)
-    print(f"Split {len(documents)} documents into {len(chunks)} chunks.") # displays how many documents were used to create how many chunks
+chunks = text_splitter.split_documents(documents)
 
-    return chunks
+for chunk in chunks:
+    content = chunk.page_content.lower()
+    if "prerequisite" in content:
+        chunk.metadata["type"] = "prerequisites"
+    elif "professor" in content or "instructor" in content or "rating" in content:
+        chunk.metadata["type"] = "professor_review"
+    elif "club" in content or "organization" in content:
+        chunk.metadata["type"] = "club"
+    elif "requirement" in content or "elective" in content:
+        chunk.metadata["type"] = "degree_requirement"
+    else:
+        chunk.metadata["type"] = "general"
+
+print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
+
+for i, chunk in enumerate(chunks[:3]):
+    print(f"\n--- Chunk {i} (type={chunk.metadata.get('type')}) ---\n{chunk.page_content}\n")
+
+return chunks
 
 # ******STAGE 3******
 
