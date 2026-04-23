@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 from textwrap import fill
 import time
+from course_tools import check_prereqs, check_degree_requirements, get_course_difficulty
+import re
 
 load_dotenv()
 
