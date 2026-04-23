@@ -252,34 +252,6 @@ def load_db():
         embedding_function=embedding_function
     )
 
-# -------- RAG FUNCTION --------
-def ask_question(query_text):
-    db = load_db()
-    results = db.similarity_search_with_relevance_scores(query_text, k=4)
-
-    if len(results) == 0 or results[0][1] < 0.7:
-        return "I couldn't find relevant information in the database."
-
-    context_text = "\n\n---\n\n".join([doc.page_content for doc, _ in results])
-    history_text = "\n".join([f"{m['role']}: {m['content']}" for m in st.session_state.messages[-4:]])
-
-    # Format user profile
-    major_text = st.session_state.major if st.session_state.major else "Not specified"
-    completed_classes_text = ", ".join(st.session_state.completed_classes) if st.session_state.completed_classes else "None specified"
-
-    prompt = prompt_template.format(
-        context=context_text,
-        question=query_text,
-        history=history_text,
-        major=major_text,
-        completed_classes=completed_classes_text
-    )
-
-    model = ChatOpenAI()
-    response = model.invoke(prompt)
-
-    return response.content
-
 # -------- MAIN QUESTION LOGIC --------
 def ask_question(query_text):
     route = route_question(query_text)
