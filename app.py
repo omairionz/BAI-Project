@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 from textwrap import fill
 import time
+from course_tools import check_prereqs, check_degree_requirements, get_course_difficulty
+import re
 
 load_dotenv()
 
@@ -207,6 +209,40 @@ User Question: {question}
 
 prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
+# -------- ROUTER HELPERS --------
+def route_question(query_text):
+    text = query_text.lower()
+
+    requirements_keywords = [
+        "requirement", "requirements", "prereq", "prerequisite",
+        "need", "graduate", "graduation", "major", "degree",
+        "bacs", "bscs", "eligible", "can i take", "what classes",
+        "what class", "track"
+    ]
+
+    easiness_keywords = [
+        "easy", "easier", "easiest", "hard", "harder", "hardest",
+        "difficulty", "difficult", "workload", "manageable",
+        "stressful", "time-consuming", "heavy"
+    ]
+
+    for word in easiness_keywords:
+        if word in text:
+            return "easiness"
+
+    for word in requirements_keywords:
+        if word in text:
+            return "requirements"
+
+    return "general"
+
+
+def extract_course_code(query_text):
+    match = re.search(r"\bCS\s*([0-9]{4})\b", query_text.upper())
+    if match:
+        return f"CS{match.group(1)}"
+    return None
+
 # -------- LOAD VECTOR DATABASE --------
 @st.cache_resource
 def load_db():
@@ -230,6 +266,104 @@ def ask_question(query_text):
     # Format user profile
     major_text = st.session_state.major if st.session_state.major else "Not specified"
     completed_classes_text = ", ".join(st.session_state.completed_classes) if st.session_state.completed_classes else "None specified"
+
+    prompt = prompt_template.format(
+        context=context_text,
+        question=query_text,
+        history=history_text,
+        major=major_text,
+        completed_classes=completed_classes_text
+    )
+
+    model = ChatOpenAI()
+    response = model.invoke(prompt)
+
+    return response.content
+
+# -------- MAIN QUESTION LOGIC --------
+def ask_question(query_text):
+    route = route_question(query_text)
+    course_code = extract_course_code(query_text)
+    lower_query = query_text.lower()
+
+    # -------- REQUIREMENTS ROUTE --------
+    if route == "requirements":
+        if course_code and (
+            "can i take" in lower_query
+            or "eligible" in lower_query
+            or "prereq" in lower_query
+            or "prerequisite" in lower_query
+        ):
+            prereq_result = check_prereqs(course_code, st.session_state.completed_classes)
+
+            if prereq_result["eligible"]:
+                return (
+                    f"Based on the classes you entered, you appear eligible to take {course_code}. "
+                    f"You have all listed prerequisites in the current tool."
+                )
+            else:
+                missing = ", ".join(prereq_result["missing_prereqs"])
+                return (
+                    f"Based on the classes you entered, you are not yet ready for {course_code}. "
+                    f"You are still missing: {missing}."
+                )
+
+        if st.session_state.major and (
+            "requirement" in lower_query
+            or "requirements" in lower_query
+            or "graduate" in lower_query
+            or "graduation" in lower_query
+            or "degree" in lower_query
+        ):
+            degree_type = "BA" if st.session_state.major == "BACS" else "BS"
+            degree_result = check_degree_requirements(
+                st.session_state.completed_classes,
+                degree_type
+            )
+
+            if "error" not in degree_result:
+                if degree_result["eligible"]:
+                    return (
+                        f"You appear to have completed the tracked required courses for the "
+                        f"{st.session_state.major} path in the current tool."
+                    )
+                else:
+                    missing = ", ".join(degree_result["missing_required_courses"])
+                    if missing:
+                        return (
+                            f"For the {st.session_state.major} track, you are still missing these "
+                            f"tracked required courses in the current tool: {missing}."
+                        )
+
+    # -------- EASINESS ROUTE --------
+    if route == "easiness" and course_code:
+        difficulty_result = get_course_difficulty(course_code)
+        difficulty = difficulty_result["difficulty"]
+
+        if difficulty != "Unknown":
+            return (
+                f"{course_code} is labeled as {difficulty} difficulty in the current tool data. "
+                f"If you want, I can also help you think about whether it fits with the rest of your schedule."
+            )
+
+    # -------- GENERAL / FALLBACK RAG --------
+    db = load_db()
+    results = db.similarity_search_with_relevance_scores(query_text, k=4)
+
+    if len(results) == 0 or results[0][1] < 0.7:
+        return "I couldn't find relevant information in the database."
+
+    context_text = "\n\n---\n\n".join([doc.page_content for doc, _ in results])
+    history_text = "\n".join(
+        [f"{m['role']}: {m['content']}" for m in st.session_state.messages[-4:]]
+    )
+
+    major_text = st.session_state.major if st.session_state.major else "Not specified"
+    completed_classes_text = (
+        ", ".join(st.session_state.completed_classes)
+        if st.session_state.completed_classes
+        else "None specified"
+    )
 
     prompt = prompt_template.format(
         context=context_text,
