@@ -38,6 +38,7 @@ Physics 2 and Lab: Chosen from ECE 2200 (4 credits) OR PHYS 2415 (3 credits) AND
 STS 2600 - Engineering Ethics Credits: 3
 STS 4500 - STS and Engineering Practice Credits: 3
 STS 4600 - The Engineer, Ethics, and Professional Responsibility Credits: 3
+
 Introduction to Programming
 All SEAS students (including CS majors) must complete one Introduction to Programming course as a part of their general SEAS requirements.  Students may also complete this requirement through Advanced Placement (AP), International Baccalaureate (IB), or dual-enrollment credit.  Some students with programming experience may wish to take the place-out test, which satisfies the requirement but does not award degree credit.  Please contact the department for more information about place-out tests.
 
@@ -47,7 +48,8 @@ CS 1110 - Introduction to Programming Credits: 3
 CS 1111 - Introduction to Programming Credits: 3
 CS 1112 - Introduction to Programming Credits: 3
 CS 1113 - Introduction to Programming Credits: 3
-Foundation Courses
+
+Foundation Courses for computer science
 These courses are the next set of courses students take after finishing Introduction to Programming and comprise the set of prerequisites for upper-level courses.  The 2000-level courses should be taken before the 3000-level courses and note that there are other prerequisites that govern the order that these courses should be taken.  Example schedules can be found on the Computer Science Department webpage.  Students who transfer approved three-credit courses to UVA in place of CS 2100, CS 2130, or CS 3130 must replace the missing fourth credit with another 2000-level or higher CS credit.
 
 CS 2100 - Data Structures and Algorithms 1 Credits: 4
@@ -57,6 +59,8 @@ CS 3100 - Data Structures and Algorithms 2 Credits: 3
 CS 3120 - Discrete Mathematics and Theory 2 Credits: 3
 CS 3130 - Computer Systems and Organization 2 Credits: 4
 CS 3140 - Software Development Essentials Credits: 3
+
+
 Upper-Level Required Courses
 BSCS majors must take one upper-level course in software engineering and one CS Capstone course to complete the SEAS senior thesis.
 

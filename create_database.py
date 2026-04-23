@@ -1,3 +1,5 @@
+#create_database.py
+
 # Import for data to "document" conversion
 from langchain_community.document_loaders import DirectoryLoader # STAGE 1
 
@@ -70,29 +72,29 @@ def split_text(documents: list[Document]):
     length_function=len,
     add_start_index=True,
     separators=["\n## ", "\n### ", "\n- ", "\n", " ", ""],
-)
+    )
 
-chunks = text_splitter.split_documents(documents)
+    chunks = text_splitter.split_documents(documents)
 
-for chunk in chunks:
-    content = chunk.page_content.lower()
-    if "prerequisite" in content:
-        chunk.metadata["type"] = "prerequisites"
-    elif "professor" in content or "instructor" in content or "rating" in content:
-        chunk.metadata["type"] = "professor_review"
-    elif "club" in content or "organization" in content:
-        chunk.metadata["type"] = "club"
-    elif "requirement" in content or "elective" in content:
-        chunk.metadata["type"] = "degree_requirement"
-    else:
-        chunk.metadata["type"] = "general"
+    for chunk in chunks:
+        content = chunk.page_content.lower()
+        if "prerequisite" in content:
+            chunk.metadata["type"] = "prerequisites"
+        elif "professor" in content or "instructor" in content or "rating" in content:
+            chunk.metadata["type"] = "professor_review"
+        elif "club" in content or "organization" in content:
+            chunk.metadata["type"] = "club"
+        elif "requirement" in content or "elective" in content:
+            chunk.metadata["type"] = "degree_requirement"
+        else:
+            chunk.metadata["type"] = "general"
 
-print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
+    print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
 
-for i, chunk in enumerate(chunks[:3]):
-    print(f"\n--- Chunk {i} (type={chunk.metadata.get('type')}) ---\n{chunk.page_content}\n")
+    for i, chunk in enumerate(chunks[:3]):
+        print(f"\n--- Chunk {i} (type={chunk.metadata.get('type')}) ---\n{chunk.page_content}\n")
 
-return chunks
+    return chunks
 
 # ******STAGE 3******
 
